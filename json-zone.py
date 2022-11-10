@@ -75,7 +75,8 @@ def main():
     zone = dns.zone.from_xfr(dns.query.xfr(args.dns_server, args.domain))
     #print(z.nodes.keys())
     #print("\"defautl_rr_set_group\": [")
-    _defaultRrSet = "\t\t\t\"default_rr_set_group\": [\n"
+    _defaultRrSet = []
+
     needsDelimeter = False
     for lName, name in endify(sorted(zone.nodes.keys())):
         if name.to_text() == "@":
@@ -83,62 +84,36 @@ def main():
         else:
             recordName = name.to_text()
         node = cast(dns.node.Node, zone.get_node(name))
+        records = {}
         for lR, r in endify(node.rdatasets):
-            rdata = ''
             #F5 min ttl 60
             if r.ttl < 60:
                 r.ttl = 60
             if r.rdtype == dns.rdatatype.SOA:
-                needsDelimeter = False
                 continue
             if r.rdtype == dns.rdatatype.NS:
-                needsDelimeter = False
                 continue
-            if needsDelimeter:
-                _defaultRrSet += ",\n"
-                needsDelimeter = False
             if r.rdtype == dns.rdatatype.CNAME:
-                valueArray = False
+                record = {"name": recordName, "value": r[0].to_text()}
             else:
-                valueArray = True
-            #print(r.rdtype)
-            #print("{}\t{}".format(r.ttl, r.to_text()))
-            #print("{")
-            #print("\t\"ttl\"\": {},".format(r.ttl))
-            #print("\t\"{}\": ".format(rdtypeToF5DX(r.rdtype)) + "{")
-            #print("\t\t\"name\": \"{}\",".format(name))
-            for end, d in endify(r):
-                #somehow check for last record to determine comma
-                if r.rdtype == dns.rdatatype.TXT:
-                    rdata += "{}".format(d.to_text())
-                elif r.rdtype == dns.rdatatype.MX:
-                    mxRecord = re.sub('\.$', '', d.to_text().split(" ")[1])
-                    priority = d.to_text().split(" ")[0]
-                    rdata += "{{\n\t\t\t\t\t\t\t\t\"domain\": \"{}\",\n\t\t\t\t\t\t\t\t\"priority\": {}\n\t\t\t\t\t\t\t}}".format(mxRecord, priority)
-                else:
-                    rdata += "\"{}\"".format(d.to_text())
-                if not end:
-                    rdata += ",\n\t\t\t\t\t\t\t"
-            #rdata = rdata + "\t\t]"
-            #print("\t}")
-            if valueArray:
-                _defaultRrSet += "\t\t\t\t{{\n\t\t\t\t\t\"ttl\": {},\n\t\t\t\t\t\"{}\": {{\n\t\t\t\t\t\t\"name\": \"{}\",\n\t\t\t\t\t\t\"values\": [\n\t\t\t\t\t\t\t{}\n\t\t\t\t\t\t]\n\t\t\t\t\t}}\n\t\t\t\t}}".format(r.ttl, rdtypeToF5DX(r.rdtype), recordName, rdata)
-            else:
-                _defaultRrSet += "\t\t\t\t{{\n\t\t\t\t\t\"ttl\": {},\n\t\t\t\t\t\"{}\": {{\n\t\t\t\t\t\t\"name\": \"{}\",\n\t\t\t\t\t\t\"value\": {}\n\t\t\t\t\t}}\n\t\t\t\t}}".format(r.ttl, rdtypeToF5DX(r.rdtype), recordName, rdata)
-            if not lR:
-                needsDelimeter = True
-            else:
-                needsDelimeter = False
-        if not lName:
-            _defaultRrSet += ",\n"
-    _defaultRrSet += "\n\t\t\t]"
+                record={}
+                rdata=[]
+                for end, d in endify(r):
+                    if r.rdtype == dns.rdatatype.MX:
+                        mx_rdata = {}
+                        mx_split = d.to_text().split(" ")
+                        priority = cast(int, mx_split[0])
+                        domain = re.sub('\.$', '', mx_split[1])
+                        mx_rdata["priority"] = priority
+                        mx_rdata["domain"] = domain
+                        rdata.append(mx_rdata)
+                    else:
+                        rdata.append(d.to_text())
+                record = {"name": recordName, "values": rdata}
+            records.update({"ttl": cast(int, r.ttl), rdtypeToF5DX(r.rdtype): record})
+            _defaultRrSet.append(records)
 
-    f5xcZone = "{{\n\t\"metadata\": {{\n\t\t\"name\": \"{}\",\n\t\t\"namespace\": \"system\",\n\t\t\"labels\": {{}},\n\t\t\"annotations\": {{}},\n\t\t\"disable\": false\n\t}},\n\t\"spec\": {{\n\t\t\"primary\": {{\n\t\t\t\"default_soa_parameters\": {{}},\n\t\t\t\"dnssec_mode\": {{\n\t\t\t\t\"disable\": {{}}\n\t\t\t}},\n\t\t\t\"rr_set_group\": [],\n{}\n\t\t}}\n\t}}\n}}".format(args.domain, _defaultRrSet)
-
-    print(f5xcZone)
-
-    #for arecord in z.iterate_rdatas(dns.rdatatype.A):
-    #    print("{}\t{}\t{}".format(arecord[0], arecord[1], arecord[2]))
+    #print(json.dumps(_defaultRrSet))
 
 ############################ GLOBALS ###############################
 
