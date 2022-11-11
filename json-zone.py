@@ -63,6 +63,13 @@ def main():
     parser = argparse.ArgumentParser(description="Argument Parser") 
     parser.add_argument("domain", type=str, help="Domain to Transfer")
     parser.add_argument("dns_server", type=str, help="Server to query for transfer")
+
+    api_url = "https://{}.ves.volterra.io/api/config/dns/namespaces/system/dns_zones".format(readSecret(".secrets/.consoleDomain"))
+
+    api_headers = {
+        "Authorization" :   "{}".format(readSecret(".secrets/.apiToken")),
+        "Accept"        :   "application/json"
+    }
     
     args = parser.parse_args()
 
@@ -134,16 +141,29 @@ def main():
             records = {"ttl": cast(int, r.ttl), rdtypeToF5DX(r.rdtype): record}
             _defaultRrSet.append(records)
 
-    print(json.dumps(_defaultRrSet, indent=4))
+    jBody = {
+        "metadata": {
+            "name": args.domain,
+            "namespace": "system",
+            "labels": {},
+            "annotations": {},
+            "disable": False
+        },
+        "spec": {
+            "primary": {
+                "default_soa_parameters": {},
+                "dnssec_mode": {
+                    "disable": {}
+                },
+                "rr_set_group": [],
+                "default_rr_set_group": _defaultRrSet
+            }
+        }
+    }
+
+    print(json.dumps(jBody, indent=4))
 
 ############################ GLOBALS ###############################
-
-api_url = "https://{}.ves.volterra.io/api/config/dns/namespaces/system/dns_zones".format(readSecret(".secrets/.consoleDomain"))
-
-api_headers = {
-            "Authorization" :   "{}".format(readSecret(".secrets/.apiToken")),
-                "Accept"        :   "application/json"
-                }
 
 if __name__ == "__main__":
     main()
