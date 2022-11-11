@@ -80,8 +80,6 @@ def main():
     #master_answer = dns.resolver.resolve(soa_answer[0].mname, "A")
 
     zone = dns.zone.from_xfr(dns.query.xfr(args.dns_server, args.domain))
-    #print(z.nodes.keys())
-    #print("\"defautl_rr_set_group\": [")
     _defaultRrSet = []
 
     needsDelimeter = False
@@ -142,8 +140,8 @@ def main():
                     else:
                         rdata.append(d.to_text())
                 record = {"name": recordName, "values": rdata}
-            records.update({"ttl": cast(int, r.ttl), rdtypeToF5DX(r.rdtype): record})
-        _defaultRrSet.append(records)
+            records = {"ttl": cast(int, r.ttl), rdtypeToF5DX(r.rdtype): record}
+            _defaultRrSet.append(records)
 
     jBody = {
         "metadata": {
@@ -165,7 +163,7 @@ def main():
         }
     }
 
-    print(json.dumps(jBody))
+    #print(json.dumps(jBody))
 
     print("Attempting to create zone at:\n{}".format(api_url))
     createZone = requests.post(api_url, verify=False, headers=api_headers, json=jBody)
