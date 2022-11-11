@@ -8,3 +8,6 @@
 /.vs/dnsF5XC/FileContentIndex
 /.vs/dnsF5XC/v17/.wsuo
 /.vs
+/zones
+/tools/__pycache__/f5.cpython-38.pyc
+/tools/__pycache__/helpers.cpython-38.pyc
