@@ -1,0 +1,10 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.secrets/.apiToken
+/.secrets/.consoleDomain
+/.vs/dnsF5XC/config/applicationhost.config
+/.vs/dnsF5XC/FileContentIndex
+/.vs/dnsF5XC/v17/.wsuo
+/.vs

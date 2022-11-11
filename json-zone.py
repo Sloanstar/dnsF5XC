@@ -94,22 +94,45 @@ def main():
             if r.rdtype == dns.rdatatype.CNAME:
                 record = {"name": recordName, "value": r[0].to_text()}
             else:
-                record={}
                 rdata=[]
                 for end, d in endify(r):
-                    if r.rdtype == dns.rdatatype.MX:
+                    if r.rdtype == dns.rdatatype.SRV:
+                        srv_rdata = {}
+                        srv_split = d.to_text().split()
+                        priority = int(srv_split[0])
+                        weight = int(srv_split[1])
+                        port = int(srv_split[2])
+                        target = srv_split[3]
+                        srv_rdata["priority"] = priority
+                        srv_rdata["weight"] = weight
+                        srv_rdata["port"] = port
+                        srv_rdata["target"] = target
+                        rdata.append(srv_rdata)
+                    elif r.rdtype == dns.rdatatype.MX:
                         mx_rdata = {}
                         mx_split = d.to_text().split(" ")
-                        priority = cast(int, mx_split[0])
+                        priority = int(mx_split[0])
                         domain = re.sub('\.$', '', mx_split[1])
                         mx_rdata["priority"] = priority
                         mx_rdata["domain"] = domain
                         rdata.append(mx_rdata)
+                    elif r.rdtype == dns.rdatatype.CAA:
+                        caa_rdata = {}
+                        caa_split = d.to_text().split()
+                        flag = int(caa_split[0])
+                        tag = caa_split[1]
+                        value = re.sub('"', '', caa_split[2])
+                        caa_rdata["flag"] = flag
+                        caa_rdata["tag"] = tag
+                        caa_rdata["value"] = value
+                        rdata.append(caa_rdata)
+                    elif r.rdtype == dns.rdatatype.TXT:
+                        rdata.append(re.sub('"','',d.to_text()))
                     else:
                         rdata.append(d.to_text())
                 record = {"name": recordName, "values": rdata}
-            records.update({"ttl": cast(int, r.ttl), rdtypeToF5DX(r.rdtype): record})
-        _defaultRrSet.append(records)
+            records = {"ttl": cast(int, r.ttl), rdtypeToF5DX(r.rdtype): record}
+            _defaultRrSet.append(records)
 
     print(json.dumps(_defaultRrSet, indent=4))
 
