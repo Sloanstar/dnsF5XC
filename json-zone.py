@@ -73,8 +73,6 @@ def main():
     #master_answer = dns.resolver.resolve(soa_answer[0].mname, "A")
 
     zone = dns.zone.from_xfr(dns.query.xfr(args.dns_server, args.domain))
-    #print(z.nodes.keys())
-    #print("\"defautl_rr_set_group\": [")
     _defaultRrSet = []
 
     needsDelimeter = False
@@ -111,16 +109,16 @@ def main():
                         rdata.append(d.to_text())
                 record = {"name": recordName, "values": rdata}
             records.update({"ttl": cast(int, r.ttl), rdtypeToF5DX(r.rdtype): record})
-            _defaultRrSet.append(records)
+        _defaultRrSet.append(records)
 
-    #print(json.dumps(_defaultRrSet))
+    print(json.dumps(_defaultRrSet, indent=4))
 
 ############################ GLOBALS ###############################
 
-api_url = "https://" + readSecret(".secrets/.consoleDomain") + ".ves.volterra.io/api/config/dns/namespaces/system/dns_zones"
+api_url = "https://{}.ves.volterra.io/api/config/dns/namespaces/system/dns_zones".format(readSecret(".secrets/.consoleDomain"))
 
 api_headers = {
-            "Authorization" :   readSecret(".secrets/.apiToken"),
+            "Authorization" :   "{}".format(readSecret(".secrets/.apiToken")),
                 "Accept"        :   "application/json"
                 }
 
