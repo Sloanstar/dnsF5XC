@@ -11,9 +11,9 @@ import argparse
 import json
 
 def main():
-    parser = argparse.ArgumentParser(description="Argument Parser") 
-    parser.add_argument("domain", type=str, help="Domain to Transfer")
-    parser.add_argument("dns_server", type=str, help="Server to query for transfer")
+    parser = argparse.ArgumentParser(description="Dumps zone from provided dns server to screen.") 
+    parser.add_argument("domain", type=str, help="Domain to dump")
+    parser.add_argument("dns_server", type=str, help="Server to query")
     
     args = parser.parse_args()
 
