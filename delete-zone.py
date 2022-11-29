@@ -10,7 +10,7 @@ def readSecret(secretPath):
 
 def main():
     parser = argparse.ArgumentParser(description="Argument Parser") 
-    parser.add_argument("domain", type=str, help="Domain to Transfer")
+    parser.add_argument("domain", type=str, help="Domain to Delete")
     args = parser.parse_args()
 
     api_url = "https://{}.console.ves.volterra.io/api/config/dns/namespaces/system/dns_zones/{}".format(readSecret(".secrets/.consoleDomain"), args.domain)
