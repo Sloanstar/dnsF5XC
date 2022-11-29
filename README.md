@@ -8,11 +8,11 @@ No way to onboard to F5XC for primary DNS without manually creating entries.
 Tested with python3.8, dnsPython2.2.1, requests2.22.0
 
 ## Secrets management
-Nothing fancy here, by default the scripts will look in a subdirectory .secrets for 2 files. The contents of these files are a single line as follows:
-  .apiToken = the full API token generated from your F5XC instance with DNS rights.
-    e.g. "APIToken sgr54fgs!zY347rgrew34wtw4trt"
-  .consoleDomain = the domain/tenant id of your console instance.
-    e.g. If your console url is foo.console.ves.volterra.io we're looking for "foo" here.
+<p>Nothing fancy here, by default the scripts will look in a subdirectory .secrets for 2 files. The contents of these files are a single line as follows:</p>
+<p>.apiToken = the full API token generated from your F5XC instance with DNS rights.<br>
+  e.g. "APIToken sgr54fgs!zY347rgrew34wtw4trt"</p>
+<p>.consoleDomain = the domain/tenant id of your console instance.<br>
+    e.g. If your console url is foo.console.ves.volterra.io we're looking for "foo" here.</p>
 
 ## Specific Script Purpose
 
