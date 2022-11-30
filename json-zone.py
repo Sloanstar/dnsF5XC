@@ -15,8 +15,8 @@ from tools.f5 import *
 
 def main():
     parser = argparse.ArgumentParser(description="Argument Parser") 
-    parser.add_argument("domain", type=str, help="Domain to Transfer")
-    parser.add_argument("dns_server", type=str, help="Server to query for transfer")
+    parser.add_argument("domain", type=str, help="Domain to JSON-ify")
+    parser.add_argument("dns_server", type=str, help="DNS Server to request AXFR from")
     args = parser.parse_args()
 
     api_url = "https://{}.console.ves.volterra.io/api/config/dns/namespaces/system/dns_zones".format(readSecret(".secrets/.consoleDomain"))
